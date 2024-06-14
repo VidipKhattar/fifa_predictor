@@ -1,0 +1,9 @@
+from django.urls import path
+from django.contrib import admin
+from . import views
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("predict/", views.PredictSong.as_view(), name="predict-song"),
+]
