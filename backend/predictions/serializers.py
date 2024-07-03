@@ -9,6 +9,9 @@ class SongGuessSerializer(serializers.ModelSerializer):
             "id",
             "song_name",
             "song_link",
+            "song_artist",
+            "song_album",
+            "song_cover",
             "song_prob",
             "song_is_fifa",
         ]
