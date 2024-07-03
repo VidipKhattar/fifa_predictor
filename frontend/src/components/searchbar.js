@@ -17,6 +17,11 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
     const ending = "/search/?title=" + encodeURIComponent(search);
     setQuery(search);
 
+    if (search.trim() === "") {
+      setSuggestions([]);
+      return;
+    }
+
     clearTimeout(timeoutId);
 
     const newTimeoutId = setTimeout(async () => {
@@ -40,7 +45,15 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
 
         console.log(tracks);
 
-        setSuggestions(tracks);
+        const uniqueTracks = tracks.filter(
+          (track, index, self) =>
+            index ===
+            self.findIndex(
+              (t) => t.name === track.name && t.artist === track.artist
+            )
+        );
+
+        setSuggestions(uniqueTracks);
       } catch (error) {
         console.error("Error fetching song suggestions:", error);
       }
