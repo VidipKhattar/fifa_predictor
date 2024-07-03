@@ -35,6 +35,13 @@ STORAGES = {
 
 DATABASES = {
     "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+"""DATABASES = {
+    "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "railway",
         "USER": "postgres",
@@ -42,7 +49,7 @@ DATABASES = {
         "HOST": "roundhouse.proxy.rlwy.net",
         "PORT": "21311",
     }
-}
+}"""
 
 
 AWS_ACCESS_KEY_ID = "AKIA2UC27F2PI3KJ3E52"
