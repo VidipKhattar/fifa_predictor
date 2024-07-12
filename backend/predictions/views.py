@@ -22,8 +22,24 @@ from pytube import YouTube
 
 from django.shortcuts import get_object_or_404
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 # json_file_path = os.path.join(os.path.dirname(__file__), "../ml_models/oauth.json")
+
+
+def get_percentile(probability):
+    queryset = songGuess.objects.all()
+    serializer_class = SongGuessSerializer(queryset, many=True)
+    data = serializer_class.data
+    song_probs = [item["song_prob"] for item in data]
+    print(song_probs)
+
+    sorted_data = sorted(song_probs)
+    count = sum(1 for x in sorted_data if x < probability)
+    percentile = (count / len(sorted_data)) * 100
+    return percentile
 
 
 def preprocess_audio(file, target_sr=22050):
@@ -92,7 +108,9 @@ class PredictSong(APIView):
             "song_is_fifa": "",
         }
         try:
+            print(request.FILES)
             if "file" in request.FILES:
+                print("hello")
                 file = request.FILES["file"]
                 file_data = io.BytesIO(file.read())
                 features = extract_features(file_data)
@@ -101,6 +119,7 @@ class PredictSong(APIView):
                 songData = request.data.get("songData")
                 video_id = songData["previewUrl"]
                 youtube_url = "https://www.youtube.com/watch?v=" + video_id
+                print(1)
 
                 queryset = songGuess.objects.filter(song_link=youtube_url)
                 serializer = SongGuessSerializer(queryset, many=True)
@@ -113,26 +132,61 @@ class PredictSong(APIView):
                     print(queryset.count())
                     print("hello")
                     print(serializer.data)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    percentile = get_percentile(serializer.data["song_prob"])
+                    return Response(
+                        {"songDict": serializer.data, "percentile": percentile},
+                        status=status.HTTP_200_OK,
+                    )
 
                 songDict["song_name"] = songData["name"]
                 songDict["song_link"] = youtube_url
+                print(youtube_url)
                 songDict["song_artist"] = songData["artist"]
                 songDict["song_album"] = songData["album"]
                 songDict["song_cover"] = songData["artwork"]
 
+                print(1)
+
                 yt = YouTube(youtube_url)
+                print(yt)
                 video = yt.streams.filter(only_audio=True).first()
+
+                print(1)
 
                 audio_buffer = io.BytesIO()
                 mp3_buffer = io.BytesIO()
+
+                print("here")
+
+                channel_layer = get_channel_layer()
+
+                print("vibe")
+
+                print(1)
 
                 start = time.time()
                 session = requests.Session()
                 r = session.get(video.url, stream=True)
                 r.raise_for_status()
-                for chunk in r.iter_content(chunk_size=1024):
-                    audio_buffer.write(chunk)
+                total_length = r.headers.get("content-length")
+
+                print(1)
+
+                if total_length is None:
+                    audio_buffer.write(r.content)
+                else:
+                    dl = 0
+                    total_length = int(total_length)
+                    for chunk in r.iter_content(chunk_size=1024):
+                        dl += len(chunk)
+                        audio_buffer.write(chunk)
+                        done = int(50 * dl / total_length)
+                        async_to_sync(channel_layer.group_send)(
+                            "progress_group",
+                            {"type": "progress_message", "message": done},
+                        )
+
+                print(1)
                 end = time.time()
                 print(end - start)
 
@@ -142,7 +196,11 @@ class PredictSong(APIView):
                 audio_segment.export(mp3_buffer, format="mp3")
                 mp3_buffer.seek(0)
 
+                print(1)
+
                 features = extract_features(mp3_buffer)
+
+                print(1)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,11 +251,20 @@ class PredictSong(APIView):
                 else:
                     print("not valid")
 
-            return Response(songDict, status=status.HTTP_200_OK)
+            print(probability)
+
+            percentile = get_percentile(probability)
+
+            print(percentile)
+
+            return Response(
+                {"songDict": songDict, "percentile": percentile},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(elf, request, format=None):
+    def get(self, request, format=None):
         queryset = songGuess.objects.all()
         serializer_class = SongGuessSerializer(queryset, many=True)
         return Response(serializer_class.data)

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [".vercel.app", ".now.sh", "127.0.0.1", "localhost"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "rest_framework",
     "predictions",
     "storages",
@@ -87,6 +89,18 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 WSGI_APPLICATION = "fifa_predictor.wsgi.application"
+
+ASGI_APPLICATION = "fifa_predictor.asgi.application"
+
+# CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # Database
