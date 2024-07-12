@@ -13,8 +13,10 @@ function SongTable() {
           : `${process.env.REACT_APP_API_BASE_URL_DEV}/predict`
       )
       .then((response) => {
-        console.log(response);
-        setSongGuess(response.data);
+        const sortedSongs = [...response.data].sort(
+          (a, b) => b.song_prob - a.song_prob
+        );
+        setSongGuess(sortedSongs);
         setLoading(false);
       })
       .catch((error) => {
@@ -25,26 +27,24 @@ function SongTable() {
 
   const renderSongGuess = () => {
     return songGuess.map((song) => (
-      <tr key={song.id} className={"border-b border-gray-200"}>
-        <td className="py-4 px-6">{song.id}</td>
-        <td className="py-4 px-6">
-          <a href={song.song_link}>{song.song_name}</a>
+      <tr key={song.id} className={"border-b border-black "}>
+        <td className="py-4 px-6 hover:underline hover:text-white hover:bg-opacity-80 transition-colors duration-200">
+          <a className="" target="_blank" href={song.song_link}>
+            {song.song_name + " - " + song.song_artist}
+          </a>
         </td>
-        <td className="py-4 px-6">{song.song_artist}</td>
-        <td className="py-4 px-6">{song.song_prob}</td>
+        <td className="py-4 px-6">{Math.round(100 * song.song_prob)}%</td>
       </tr>
     ));
   };
 
   return (
-    <div className="container mx-auto px-4 text-center">
-      <div className="overflow-auto ">
-        <table className="table-auto w-full bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg rounded-lg shadow-lg text-center">
+    <div className="container mx-auto">
+      <div className="overflow-auto max-h-96 text-black rounded-2xl ">
+        <table className="table-auto w-full bg-white bg-opacity-25  backdrop-filter backdrop-blur-lg shadow-lg text-center">
           <thead>
-            <tr>
-              <th className="py-4 px-6"></th>
-              <th className="py-4 px-6">Name</th>
-              <th className="py-4 px-6">Artist</th>
+            <tr className="">
+              <th className="py-4 px-6">Song Title</th>
               <th className="py-4 px-6">Probability</th>
             </tr>
           </thead>

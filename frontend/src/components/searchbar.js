@@ -31,6 +31,7 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
             ? process.env.REACT_APP_API_BASE_URL_PROD + ending
             : process.env.REACT_APP_API_BASE_URL_DEV + ending
         );
+        console.log(get_response.data["search_value"]);
         const tracks = get_response.data["search_value"].map((result) => ({
           name: result.title,
           artist:
@@ -42,8 +43,6 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
           album: result.album.name,
           releaseDate: result.year,
         }));
-
-        console.log(tracks);
 
         const uniqueTracks = tracks.filter(
           (track, index, self) =>
@@ -81,12 +80,12 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
           value={query}
           onChange={handleChange}
           placeholder="Search for songs..."
-          className="font-semibold w-full text-gray-600 bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg py-2 px-4"
+          className="w-full text-white bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg min-[400px]:py-2 px-4"
         />
 
         {query && (
           <button
-            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-400 focus:outline-none"
+            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-white focus:outline-none"
             onClick={handleClearSearch}
           >
             <svg
@@ -105,14 +104,14 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
         )}
       </div>
       {query && suggestions.length > 0 && (
-        <ul className="font-semibold text-gray-600  absolute top-full left-0 z-40 bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg p-2 rounded-xl shadow-lg">
+        <ul className="text-white absolute top-full left-0 z-40 bg-white bg-opacity-25 backdrop-filter backdrop-blur-lg p-2 rounded-xl shadow-lg">
           {suggestions.map((song, index) => (
             <li
               key={`${song.name}-${song.artist}-${index}`}
               onClick={() => handleSelect(song)}
               className={`cursor-pointer py-1 px-2 hover:text-white transition-colors duration-250 rounded ${
                 index < suggestions.length - 1
-                  ? "border-b border-gray-600 text-gray-600  "
+                  ? "border-b border-gray-600 text-white  "
                   : ""
               }`}
             >
