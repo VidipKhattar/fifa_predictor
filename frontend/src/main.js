@@ -241,7 +241,7 @@ const Main = () => {
           )}
 
           <div>
-            {searchLoading && currentForm == "search" && (
+            {searchLoading && currentForm === "search" && (
               <div className="">
                 <div>
                   <p className="text-gray-400 text-center">{loadingMessage}</p>

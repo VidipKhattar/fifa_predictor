@@ -32,7 +32,12 @@ function SongTable() {
         className={" text-xs md:text-sm lg:text-lg border-b border-black "}
       >
         <td className="py-4 px-6 hover:underline hover:text-white hover:bg-opacity-80 transition-colors duration-200">
-          <a className="" target="_blank" href={song.song_link}>
+          <a
+            className=""
+            target="_blank"
+            rel="noreferrer"
+            href={song.song_link}
+          >
             {song.song_name + " - " + song.song_artist}
           </a>
         </td>

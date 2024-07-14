@@ -7,7 +7,7 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
   const [timeoutId, setTimeoutId] = useState(null);
 
   useEffect(() => {
-    if (userAnswer == "") {
+    if (userAnswer === "") {
       setQuery("");
     }
   }, [userAnswer]);
