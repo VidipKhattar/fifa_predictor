@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    command: daphne -b 0.0.0.0 -p 8000 fifa_predictor.asgi:application
+    volumes:
+      - ./backend:/code
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=fifa_predictor.settings
+    depends_on:
+      - redis
+    networks:
+      - backend
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - frontend
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+networks:
+  backend:
+  frontend:
+

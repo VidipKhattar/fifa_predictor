@@ -5,23 +5,17 @@ import io
 import subprocess
 import requests
 import time
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import songGuess
 from .serializers import SongGuessSerializer
 from .apps import PredictionsConfig
-
-
 from django.core.files.storage import default_storage
 from pydub import AudioSegment
 from ytmusicapi import YTMusic
 from pytube import YouTube
-
 from django.shortcuts import get_object_or_404
-
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
