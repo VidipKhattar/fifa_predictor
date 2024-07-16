@@ -133,8 +133,6 @@ class PredictSong(APIView):
                 audio_buffer = io.BytesIO()
                 mp3_buffer = io.BytesIO()
 
-                channel_layer = get_channel_layer()
-
                 start = time.time()
                 session = requests.Session()
                 r = session.get(video.url, stream=True)
@@ -144,16 +142,8 @@ class PredictSong(APIView):
                 if total_length is None:
                     audio_buffer.write(r.content)
                 else:
-                    dl = 0
-                    total_length = int(total_length)
                     for chunk in r.iter_content(chunk_size=1024):
-                        dl += len(chunk)
                         audio_buffer.write(chunk)
-                        done = int(50 * dl / total_length)
-                        async_to_sync(channel_layer.group_send)(
-                            "progress_group",
-                            {"type": "progress_message", "message": done},
-                        )
 
                 audio_buffer.seek(0)
                 audio_segment = AudioSegment.from_file(audio_buffer)
