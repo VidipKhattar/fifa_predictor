@@ -13,3 +13,10 @@ backend/fifa_predictor/__pycache__/urls.cpython-311.pyc
 backend/fifa_predictor/__pycache__/wsgi.cpython-311.pyc
 backend/predictions/migrations/__pycache__/0001_initial.cpython-311.pyc
 backend/predictions/migrations/__pycache__/__init__.cpython-311.pyc
+backend/predictions/migrations/__pycache__/0004_songguess_song_artist.cpython-311.pyc
+backend/predictions/migrations/__pycache__/0003_remove_songguess_song_artist.cpython-311.pyc
+backend/predictions/migrations/__pycache__/0002_songguess_song_album_songguess_song_artist_and_more.cpython-311.pyc
+backend/predictions/__pycache__/routing.cpython-311.pyc
+backend/predictions/__pycache__/consumers.cpython-311.pyc
+backend/fifa_predictor/__pycache__/asgi.cpython-311.pyc
+backend/db.sqlite3
