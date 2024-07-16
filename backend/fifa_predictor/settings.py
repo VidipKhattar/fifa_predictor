@@ -25,7 +25,14 @@ SECRET_KEY = "django-insecure-(9@d!h!i5xp$$h)n0t+@)@x1aay08l!l2lw(y0*1smo5=5y3fe
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".vercel.app", ".now.sh", "127.0.0.1", "localhost"]
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "backend", "frontend"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://frontend:3000",
+]
 
 
 # Application definition
@@ -97,7 +104,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }

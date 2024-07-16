@@ -28,7 +28,6 @@ const Main = () => {
   const [percentile, setPercentile] = useState(null);
 
   const handleFileChange = (e) => {
-    console.log(e.target.files[0]);
     setFile(e.target.files[0]);
     setFile((prevFormData) => ({
       ...prevFormData,
@@ -41,7 +40,6 @@ const Main = () => {
     e.preventDefault();
     setSongResponse(null);
     setProgress(0);
-    console.log(file);
     try {
       const response = await axios.post(
         process.env.NODE_ENV === "production"
@@ -54,7 +52,6 @@ const Main = () => {
           },
         }
       );
-      console.log(response);
       setSongResponse(response.data["songDict"]);
       setPercentile(response.data["percentile"]);
       setError(null);
@@ -70,7 +67,6 @@ const Main = () => {
     setSongResponse(null);
     setSearchLoading(true);
     setProgress(0);
-    console.log(songData.previewUrl);
     try {
       const response = await axios.post(
         process.env.NODE_ENV === "production"
@@ -79,7 +75,6 @@ const Main = () => {
         { songData }
       );
       setProgress(100);
-      console.log(response);
       setSongResponse(response.data["songDict"]);
       setPercentile(response.data["percentile"]);
 
@@ -106,7 +101,7 @@ const Main = () => {
     const socket = new WebSocket(
       process.env.NODE_ENV === "production"
         ? process.env.REACT_APP_WS_BASE_URL_PROD + "/ws/progress/"
-        : "ws://localhost:8000/ws/progress/"
+        : "ws://backend:8000/ws/progress/"
     );
     console.log(socket);
     socket.onmessage = (event) => {

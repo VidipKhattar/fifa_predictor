@@ -28,8 +28,6 @@ def get_percentile(probability):
     serializer_class = SongGuessSerializer(queryset, many=True)
     data = serializer_class.data
     song_probs = [item["song_prob"] for item in data]
-    print(song_probs)
-
     sorted_data = sorted(song_probs)
     count = sum(1 for x in sorted_data if x < probability)
     percentile = (count / len(sorted_data)) * 100
@@ -91,7 +89,6 @@ def extract_features(file_path):
 
 class PredictSong(APIView):
     def post(self, request, *args, **kwargs):
-        print(request.data.get("songData"))
         songDict = {
             "song_name": "",
             "song_link": "",
@@ -102,9 +99,7 @@ class PredictSong(APIView):
             "song_is_fifa": "",
         }
         try:
-            print(request.FILES)
             if "file" in request.FILES:
-                print("hello")
                 file = request.FILES["file"]
                 file_data = io.BytesIO(file.read())
                 features = extract_features(file_data)
@@ -113,8 +108,6 @@ class PredictSong(APIView):
                 songData = request.data.get("songData")
                 video_id = songData["previewUrl"]
                 youtube_url = "https://www.youtube.com/watch?v=" + video_id
-                print(1)
-
                 queryset = songGuess.objects.filter(song_link=youtube_url)
                 serializer = SongGuessSerializer(queryset, many=True)
                 if queryset.count() >= 1:
@@ -122,10 +115,6 @@ class PredictSong(APIView):
                     song_guess = get_object_or_404(
                         songGuess, pk=serializer.data.get("id")
                     )
-                    print(song_guess)
-                    print(queryset.count())
-                    print("hello")
-                    print(serializer.data)
                     percentile = get_percentile(serializer.data["song_prob"])
                     return Response(
                         {"songDict": serializer.data, "percentile": percentile},
@@ -134,37 +123,23 @@ class PredictSong(APIView):
 
                 songDict["song_name"] = songData["name"]
                 songDict["song_link"] = youtube_url
-                print(youtube_url)
                 songDict["song_artist"] = songData["artist"]
                 songDict["song_album"] = songData["album"]
                 songDict["song_cover"] = songData["artwork"]
 
-                print(1)
-
                 yt = YouTube(youtube_url)
-                print(yt)
                 video = yt.streams.filter(only_audio=True).first()
-
-                print(1)
 
                 audio_buffer = io.BytesIO()
                 mp3_buffer = io.BytesIO()
 
-                print("here")
-
                 channel_layer = get_channel_layer()
-
-                print("vibe")
-
-                print(1)
 
                 start = time.time()
                 session = requests.Session()
                 r = session.get(video.url, stream=True)
                 r.raise_for_status()
                 total_length = r.headers.get("content-length")
-
-                print(1)
 
                 if total_length is None:
                     audio_buffer.write(r.content)
@@ -180,21 +155,17 @@ class PredictSong(APIView):
                             {"type": "progress_message", "message": done},
                         )
 
-                print(1)
-                end = time.time()
-                print(end - start)
-
                 audio_buffer.seek(0)
                 audio_segment = AudioSegment.from_file(audio_buffer)
 
                 audio_segment.export(mp3_buffer, format="mp3")
                 mp3_buffer.seek(0)
 
-                print(1)
-
                 features = extract_features(mp3_buffer)
 
-                print(1)
+                end = time.time()
+                print(end - start)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -234,22 +205,12 @@ class PredictSong(APIView):
             # Clean up the uploaded file
             # os.remove(file_path)
 
-            print(songDict)
-
             if request.data.get("songData"):
                 serializer_class = SongGuessSerializer(data=songDict)
-                print(songDict)
                 if serializer_class.is_valid():
-                    print("valid")
                     serializer_class.save()
-                else:
-                    print("not valid")
-
-            print(probability)
 
             percentile = get_percentile(probability)
-
-            print(percentile)
 
             return Response(
                 {"songDict": songDict, "percentile": percentile},
