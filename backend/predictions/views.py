@@ -16,8 +16,6 @@ from pydub import AudioSegment
 from ytmusicapi import YTMusic
 from pytube import YouTube
 from django.shortcuts import get_object_or_404
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 
 # json_file_path = os.path.join(os.path.dirname(__file__), "../ml_models/oauth.json")
