@@ -1,7 +1,7 @@
 import axios from "axios";
 import SearchBar from "./components/searchbar";
 import SongTable from "./components/songTable";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import LinearProgress from "@mui/material/LinearProgress";
 import Fade from "react-reveal/Fade";
 

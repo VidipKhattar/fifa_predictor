@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   backend:
@@ -9,12 +9,8 @@ services:
       - ./backend:/code
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
       - DJANGO_SETTINGS_MODULE=fifa_predictor.settings
-    depends_on:
-      - redis
     networks:
       - backend
       - frontend
