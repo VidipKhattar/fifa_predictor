@@ -18,9 +18,6 @@ from pytube import YouTube
 from django.shortcuts import get_object_or_404
 
 
-# json_file_path = os.path.join(os.path.dirname(__file__), "../ml_models/oauth.json")
-
-
 def get_percentile(probability):
     queryset = songGuess.objects.all()
     serializer_class = SongGuessSerializer(queryset, many=True)
@@ -223,3 +220,20 @@ class getSearchResults(APIView):
             item for item in search_results if item.get("resultType") == "song"
         ]
         return Response({"search_value": filtered_data}, status=status.HTTP_200_OK)
+
+
+class getVideoLength(APIView):
+    def get(self, request):
+        video_id = request.query_params.get("videoId")
+        if not video_id:
+            return Response(
+                {"error": "videoId is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            youtube_url = "https://www.youtube.com/watch?v=" + video_id
+            time = YouTube(youtube_url).length
+            return Response({"video_length": time}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

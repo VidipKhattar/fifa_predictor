@@ -26,6 +26,7 @@ const Main = () => {
   const [currentForm, setCurrentForm] = useState("search");
   const [loadingMessage, setLoadingMessage] = useState("");
   const [percentile, setPercentile] = useState(null);
+  //const [videoLength, setVideoLength] = useState(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -68,6 +69,10 @@ const Main = () => {
     setSearchLoading(true);
     setProgress(0);
     try {
+      console.log(songData.previewUrl);
+      const videoLength = await getVideoDuration(songData.previewUrl);
+      console.log(videoLength);
+      progressBarIncrement(videoLength);
       const response = await axios.post(
         process.env.NODE_ENV === "production"
           ? process.env.REACT_APP_API_BASE_URL_PROD + "/predict/"
@@ -75,6 +80,7 @@ const Main = () => {
         { songData }
       );
       setProgress(100);
+      console.log(response.data);
       setSongResponse(response.data["songDict"]);
       setPercentile(response.data["percentile"]);
 
@@ -97,212 +103,263 @@ const Main = () => {
     }
   };
 
-  useEffect(() => {
-    const socket = new WebSocket(
-      process.env.NODE_ENV === "production"
-        ? process.env.REACT_APP_WS_BASE_URL_PROD + "/ws/progress/"
-        : "ws://backend:8000/ws/progress/"
-    );
-    console.log(socket);
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      let number = data["message"] * 2;
-      setProgress(number);
-      if (number < 10 && number > 1) {
-        setLoadingMessage(loadingMessages[0]);
-      } else if (number > 9 && number < 69) {
-        let numStr = number.toString();
-        setLoadingMessage(loadingMessages[parseInt(numStr[0])]);
-      } else {
-        setLoadingMessage(loadingMessages[6]);
-      }
-    };
+  const getVideoDuration = async (videoId) => {
+    try {
+      const response = await axios.get(
+        process.env.NODE_ENV === "production"
+          ? `${process.env.REACT_APP_API_BASE_URL_PROD}/length/?videoId=${videoId}`
+          : `${process.env.REACT_APP_API_BASE_URL_DEV}/length/?videoId=${videoId}`
+      );
+      console.log(response.data);
+      const length = response.data["video_length"];
+      console.log("Video length:", length);
+      setError(null);
+      return length;
+    } catch (err) {
+      console.error(err);
+      setError(err.response.data.error);
+    }
+  };
 
-    return () => socket.close();
-  }, []);
+  const progressBarIncrement = (videoLength) => {
+    console.log("Video Length:", videoLength);
+    const timeShould = videoLength / 2;
+    console.log("time taken should be: ", timeShould);
+    const increment = 10 / timeShould;
+    console.log("Increment:", increment);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const newProgress = Math.min(prev + increment, 100);
+        console.log("New Progress:", newProgress);
+        if (isNaN(newProgress)) {
+          console.error("Progress is NaN");
+          clearInterval(interval);
+          return prev; // Return the previous progress if there's an error
+        }
+        if (newProgress >= 100) {
+          clearInterval(interval);
+        }
+        if (newProgress < 10 && newProgress > 1) {
+          setLoadingMessage(loadingMessages[0]);
+        } else if (newProgress > 9 && newProgress < 69) {
+          let numStr = newProgress.toString();
+          setLoadingMessage(loadingMessages[parseInt(numStr[0])]);
+        } else {
+          setLoadingMessage(loadingMessages[6]);
+        }
+        return newProgress;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  };
 
   return (
-    <div>
-      <div className="container mx-auto px-6 py-4">
-        <div className="grid md:grid-cols-2 grid-cols-1 gap-4 sm:m-5">
-          <h1 className="text-2xl md:text-5xl lg:text-6xl italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500  to-purple-500">
-            FIFA SONG PREDICTOR
-          </h1>
-          <p className="text-gray-400">
-            <span className="block md:hidden text-sm">
-              Analyze your favorite songs to predict their likelihood of being
-              in the next FIFA. Upload/Search a song to see its potential!
-            </span>
-            <span className="hidden md:block lg:hidden">
-              Welcome to FIFA Song Predictor. Analyze your favorite songs to
-              predict their likelihood of being in the next FIFA/EA FC game.
-              Upload/Search a song to see its potential!
-            </span>
-            <span className="hidden lg:block xl:hidden">
-              Welcome to FIFA Song Predictor, an innovative web app that
-              analyzes your favorite songs to predict their likelihood of being
-              featured in the next FIFA/EA FC game. Upload/Search a song, and
-              our advanced machine learning model will provide a probability
-              score indicating its potential to become a FIFA soundtrack hit.
-            </span>
-            <span className="hidden xl:block">
-              Welcome to FIFA Song Predictor, an innovative web app that
-              analyzes your favorite songs to predict their likelihood of being
-              featured in the next FIFA/EA FC game. Search/Upload a song, and
-              our advanced machine learning model will provide a probability
-              score indicating its potential to become a FIFA soundtrack hit.
-              Try it out and see if your favorite tune has what it takes to make
-              the cut!
-            </span>
-          </p>
-        </div>
-        <Fade bottom duration={1200}>
-          <div className="grid grid-cols-2 gap-4 pt-2 pb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 ">
-            <button onClick={() => setCurrentForm("search")}>
-              <span
-                className={`${
-                  currentForm === "search" ? "font-bold italic" : ""
-                } hover:font-bold hover:italic`}
-              >
-                Search search
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow">
+        {/* Main Content */}
+        <div className="container mx-auto px-6 py-4">
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-4 sm:m-5">
+            <h1 className="text-2xl md:text-5xl lg:text-6xl italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+              FIFA SONG PREDICTOR
+            </h1>
+            <p className="text-gray-400">
+              <span className="block md:hidden text-sm">
+                Analyze your favorite songs to predict their likelihood of being
+                in the next FIFA. Upload/Search a song to see its potential!
               </span>
-            </button>
-            <button onClick={() => setCurrentForm("upload")}>
-              <span
-                className={`${
-                  currentForm === "upload" ? "font-bold italic" : ""
-                } hover:font-bold hover:italic`}
-              >
-                Upload File
+              <span className="hidden md:block lg:hidden">
+                Welcome to FIFA Song Predictor. Analyze your favorite songs to
+                predict their likelihood of being in the next FIFA/EA FC game.
+                Upload/Search a song to see its potential!
               </span>
-            </button>
+              <span className="hidden lg:block xl:hidden">
+                Welcome to FIFA Song Predictor, an innovative web app that
+                analyzes your favorite songs to predict their likelihood of
+                being featured in the next FIFA/EA FC game. Upload/Search a
+                song, and our advanced machine learning model will provide a
+                probability score indicating its potential to become a FIFA
+                soundtrack hit.
+              </span>
+              <span className="hidden xl:block">
+                Welcome to FIFA Song Predictor, an innovative web app that
+                analyzes your favorite songs to predict their likelihood of
+                being featured in the next FIFA/EA FC game. Search/Upload a
+                song, and our advanced machine learning model will provide a
+                probability score indicating its potential to become a FIFA
+                soundtrack hit. Try it out and see if your favorite tune has
+                what it takes to make the cut!
+              </span>
+            </p>
           </div>
-        </Fade>
-        <div>
           <Fade bottom duration={1200}>
-            {currentForm === "upload" && (
-              <div className="pb-4">
-                <form
-                  className="grid grid-cols-4 gap-4"
-                  onSubmit={handleFileSubmit}
+            <div className="grid grid-cols-2 gap-4 pt-2 pb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+              <button onClick={() => setCurrentForm("search")}>
+                <span
+                  className={`${
+                    currentForm === "search" ? "font-bold italic" : ""
+                  } hover:font-bold hover:italic`}
                 >
-                  <input
-                    className="col-span-3"
-                    type="file"
-                    onChange={handleFileChange}
-                  />
-                  <button
-                    className="min-[400px]:bg-violet-600 hover:bg-opacity-80 transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg  w-full text-white"
-                    type="submit"
-                  >
-                    {searchLoading ? (
-                      <div
-                        className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                        role="status"
-                      ></div>
-                    ) : (
-                      "Analyse"
-                    )}
-                  </button>
-                </form>
-              </div>
-            )}
-          </Fade>
-          {currentForm === "search" && (
-            <div className="grid grid-cols-4 gap-4 pb-4">
-              <div className=" col-span-3">
-                <SearchBar
-                  onSearchResultsChange={handleSamplerSearchResultsChange}
-                  userAnswer={userAnswer}
-                />
-              </div>
-
-              <button
-                className="min-[400px]:bg-violet-600 hover:bg-opacity-80 transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg  w-full text-white"
-                type="submit"
-                onClick={submitSongURl}
-                disabled={searchLoading}
-              >
-                {searchLoading ? (
-                  <div
-                    className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                    role="status"
-                  ></div>
-                ) : (
-                  "Analyse"
-                )}
+                  Search
+                </span>
+              </button>
+              <button onClick={() => setCurrentForm("upload")}>
+                <span
+                  className={`${
+                    currentForm === "upload" ? "font-bold italic" : ""
+                  } hover:font-bold hover:italic`}
+                >
+                  Upload File
+                </span>
               </button>
             </div>
-          )}
-
+          </Fade>
           <div>
-            {searchLoading && currentForm === "search" && (
-              <div className="">
-                <div>
-                  <p className="text-gray-400 text-center">{loadingMessage}</p>
-                </div>
-                <LinearProgress
-                  variant="determinate"
-                  value={progress}
-                ></LinearProgress>
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white text-center md:text-left ">
-            <div>
-              {songResponse !== null && (
-                <div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5">
-                    <div>
-                      <Fade left duration={1500}>
-                        <h3 className="min-[400px]:text-5xl italic font-bold">
-                          {parseInt(songResponse.song_prob * 100)}%
-                        </h3>
-                        <p> Probability of being a FIFA song</p>
-                      </Fade>
-                      <Fade left duration={1300}>
-                        <h1 className="min-[400px]:text-3xl italic font-bold pt-2 ">
-                          {songResponse.song_name}
-                        </h1>
-                        <h2 className="min-[400px]:text-xl italic font-bold">
-                          {songResponse.song_artist}
-                        </h2>
-                      </Fade>
-                    </div>
-                    <Fade left duration={1200}>
-                      <div className="flex justify-center items-center rounded-xl">
-                        <img
-                          src={songResponse.song_cover}
-                          style={{ maxWidth: "100%", maxHeight: "200px" }}
-                          alt="alt.png"
-                          className="rounded-2xl"
-                        />
-                      </div>
-                    </Fade>
-                  </div>
-                  <Fade left duration={1300}>
-                    <p className="m-5">
-                      {parseInt(percentile)} percentile of searched songs
-                    </p>
-                  </Fade>
-                  <Fade left duration={1600}>
-                    <p className="m-5">
-                      Check the table for a list of songs previous users have
-                      analysed and their FIFA likelihood
-                    </p>
-                  </Fade>
+            <Fade bottom duration={1200}>
+              {currentForm === "upload" && (
+                <div className="pb-4">
+                  <form
+                    className="grid grid-cols-4 gap-4"
+                    onSubmit={handleFileSubmit}
+                  >
+                    <input
+                      className="col-span-3"
+                      type="file"
+                      onChange={handleFileChange}
+                    />
+                    <button
+                      className="min-[400px]:bg-violet-600 hover:bg-opacity-80 transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white"
+                      type="submit"
+                    >
+                      {searchLoading ? (
+                        <div
+                          className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                          role="status"
+                        ></div>
+                      ) : (
+                        "Analyse"
+                      )}
+                    </button>
+                  </form>
                 </div>
               )}
-              {error && <div>Error: {error}</div>}
+            </Fade>
+            {currentForm === "search" && (
+              <div className="grid grid-cols-4 gap-4 pb-4">
+                <div className="col-span-3">
+                  <SearchBar
+                    onSearchResultsChange={handleSamplerSearchResultsChange}
+                    userAnswer={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                  />
+                </div>
+                <button
+                  className={`min-[400px]:bg-violet-600 ${
+                    !userAnswer
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-opacity-80"
+                  } transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white`}
+                  type="submit"
+                  onClick={submitSongURl}
+                  disabled={!userAnswer || searchLoading}
+                >
+                  {searchLoading ? (
+                    <div
+                      className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                      role="status"
+                    ></div>
+                  ) : (
+                    "Analyse"
+                  )}
+                </button>
+              </div>
+            )}
+            <div>
+              {searchLoading && currentForm === "search" && (
+                <div>
+                  <div>
+                    <p className="text-gray-400 text-center">
+                      {loadingMessage}
+                    </p>
+                  </div>
+                  <LinearProgress
+                    variant="determinate"
+                    value={progress}
+                  ></LinearProgress>
+                </div>
+              )}
             </div>
-            <div className="py-2">
-              <Fade bottom duration={1500}>
-                <SongTable></SongTable>
-              </Fade>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white text-center md:text-left">
+              <div>
+                {songResponse !== null && (
+                  <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5">
+                      <div>
+                        <Fade left duration={1500}>
+                          <h3 className="min-[400px]:text-5xl italic font-bold">
+                            {parseInt(songResponse.song_prob * 100)}%
+                          </h3>
+                          <p> Probability of being a FIFA song</p>
+                        </Fade>
+                        <Fade left duration={1300}>
+                          <h1 className="min-[400px]:text-3xl italic font-bold pt-2">
+                            {songResponse.song_name}
+                          </h1>
+                          <h2 className="min-[400px]:text-xl italic font-bold">
+                            {songResponse.song_artist}
+                          </h2>
+                        </Fade>
+                      </div>
+                      <Fade left duration={1200}>
+                        <div className="flex justify-center items-center rounded-xl">
+                          <img
+                            src={songResponse.song_cover}
+                            style={{ maxWidth: "100%", maxHeight: "200px" }}
+                            alt="alt.png"
+                            className="rounded-2xl"
+                          />
+                        </div>
+                      </Fade>
+                    </div>
+                    <Fade left duration={1300}>
+                      <p className="m-5">
+                        {parseInt(percentile)} percentile of searched songs
+                      </p>
+                    </Fade>
+                    <Fade left duration={1600}>
+                      <p className="m-5">
+                        Check the table for a list of songs previous users have
+                        analysed and their FIFA likelihood
+                      </p>
+                    </Fade>
+                  </div>
+                )}
+                {error && <div>Error: {error}</div>}
+              </div>
+              <div className="py-2">
+                <Fade bottom duration={1500}>
+                  <SongTable />
+                </Fade>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-4 text-center">
+        <p>
+          Created by Vidip Khattar |{" "}
+          <a
+            href="https://github.com/VidipKhattar/fifa_predictor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            GitHub
+          </a>
+        </p>
+      </footer>
     </div>
   );
 };
