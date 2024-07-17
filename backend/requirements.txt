@@ -9,7 +9,8 @@ sqlparse==0.4.4
 typing_extensions==4.5.0
 whitenoise==6.6.0
 psycopg2-binary==2.9.9
-git+https://github.com/VidipKhattar/pytube
+git+https://github.com/VidipKhattar/pytube@854875ecfb2e215b568bd31079e8f5b7e9add9d1
+#git+https://github.com/VidipKhattar/pytube
 pydub==0.25.1
 librosa==0.10.2.post1
 ytmusicapi==1.7.3
