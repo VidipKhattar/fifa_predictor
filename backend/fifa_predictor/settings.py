@@ -26,7 +26,14 @@ SECRET_KEY = "django-insecure-(9@d!h!i5xp$$h)n0t+@)@x1aay08l!l2lw(y0*1smo5=5y3fe
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "backend", "frontend", ".vercel.app"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "backend",
+    "frontend",
+    ".vercel.app",
+    "fifa-predictor.onrender.com",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
