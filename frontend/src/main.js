@@ -154,37 +154,58 @@ const Main = () => {
         {/* Main Content */}
         <div className="container mx-auto px-6 py-4">
           <div className="grid md:grid-cols-2 grid-cols-1 gap-4 sm:m-5">
-            <h1 className="text-2xl md:text-5xl lg:text-6xl italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
-              FIFA SONG PREDICTOR
-            </h1>
-            <p className="text-gray-400">
-              <span className="block md:hidden text-sm">
-                Analyze your favorite songs to predict their likelihood of being
-                in the next FIFA. Upload/Search a song to see its potential!
-              </span>
-              <span className="hidden md:block lg:hidden">
-                Welcome to FIFA Song Predictor. Analyze your favorite songs to
-                predict their likelihood of being in the next FIFA/EA FC game.
-                Upload/Search a song to see its potential!
-              </span>
-              <span className="hidden lg:block xl:hidden">
-                Welcome to FIFA Song Predictor, an innovative web app that
-                analyzes your favorite songs to predict their likelihood of
-                being featured in the next FIFA/EA FC game. Upload/Search a
-                song, and our advanced machine learning model will provide a
-                probability score indicating its potential to become a FIFA
-                soundtrack hit.
-              </span>
-              <span className="hidden xl:block">
-                Welcome to FIFA Song Predictor, an innovative web app that
-                analyzes your favorite songs to predict their likelihood of
-                being featured in the next FIFA/EA FC game. Search/Upload a
-                song, and our advanced machine learning model will provide a
-                probability score indicating its potential to become a FIFA
-                soundtrack hit. Try it out and see if your favorite tune has
-                what it takes to make the cut!
-              </span>
-            </p>
+            <motion.div
+              className="box"
+              animate={{ y: 0, opacity: 1 }}
+              initial={{ y: 100, opacity: 0 }}
+              transition={{
+                y: { type: "spring", duration: 0.9 },
+                opacity: { duration: 0.9 },
+              }}
+            >
+              <h1 className="text-2xl md:text-5xl lg:text-6xl italic font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+                FIFA SONG PREDICTOR
+              </h1>
+            </motion.div>
+            <motion.div
+              className="box"
+              animate={{ y: 0, opacity: 1 }}
+              initial={{ y: 100, opacity: 0 }}
+              transition={{
+                y: { type: "spring", duration: 0.9 },
+                opacity: { duration: 0.9 },
+              }}
+            >
+              <p className="text-gray-400">
+                <span className="block md:hidden text-sm">
+                  Analyze your favorite songs to predict their likelihood of
+                  being in the next FIFA. Upload/Search a song to see its
+                  potential!
+                </span>
+                <span className="hidden md:block lg:hidden">
+                  Welcome to FIFA Song Predictor. Analyze your favorite songs to
+                  predict their likelihood of being in the next FIFA/EA FC game.
+                  Upload/Search a song to see its potential!
+                </span>
+                <span className="hidden lg:block xl:hidden">
+                  Welcome to FIFA Song Predictor, an innovative web app that
+                  analyzes your favorite songs to predict their likelihood of
+                  being featured in the next FIFA/EA FC game. Upload/Search a
+                  song, and our advanced machine learning model will provide a
+                  probability score indicating its potential to become a FIFA
+                  soundtrack hit.
+                </span>
+                <span className="hidden xl:block">
+                  Welcome to FIFA Song Predictor, an innovative web app that
+                  analyzes your favorite songs to predict their likelihood of
+                  being featured in the next FIFA/EA FC game. Search/Upload a
+                  song, and our advanced machine learning model will provide a
+                  probability score indicating its potential to become a FIFA
+                  soundtrack hit. Try it out and see if your favorite tune has
+                  what it takes to make the cut!
+                </span>
+              </p>
+            </motion.div>
           </div>
           <motion.div
             className="box"
@@ -195,8 +216,6 @@ const Main = () => {
               opacity: { duration: 1.2 },
             }}
           >
-            {/* Content here */}
-
             <div className="grid grid-cols-2 gap-4 pt-2 pb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
               <button onClick={() => setCurrentForm("search")}>
                 <span
