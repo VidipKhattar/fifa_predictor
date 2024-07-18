@@ -71,6 +71,8 @@ const Main = () => {
     try {
       const videoLength = await getVideoDuration(songData.previewUrl);
       progressBarIncrement(videoLength);
+      console.log(process.env.REACT_APP_API_BASE_URL_PROD);
+      console.log(process.env.REACT_APP_API_BASE_URL_DEV);
       const response = await axios.post(
         process.env.NODE_ENV === "production"
           ? process.env.REACT_APP_API_BASE_URL_PROD + "/predict/"
