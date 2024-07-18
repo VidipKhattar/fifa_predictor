@@ -33,23 +33,23 @@ STORAGES = {
     },
 }
 
-DATABASES = {
+"""DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
-}
+}"""
 
-"""DATABASES = {
+DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "railway",
-        "USER": "postgres",
-        "PASSWORD": "NaoBDlexjgQaIpIvCXljZMAdTLJGgFZp",
-        "HOST": "roundhouse.proxy.rlwy.net",
-        "PORT": "21311",
+        "NAME": "render_lger",
+        "USER": "render_lger_user",
+        "PASSWORD": "4jS4nrZTQDLo5SSkcZibTv0kAzUfYnCj",
+        "HOST": "dpg-cqcfmq88fa8c73cp7l7g-a.singapore-postgres.render.com",
+        "PORT": "5432",
     }
-}"""
+}
 
 
 STATIC_URL = "static/"
