@@ -177,21 +177,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-AWS_ACCESS_KEY_ID = "AKIA2UC27F2PI3KJ3E52"
-AWS_SECRET_ACCESS_KEY = "ClGVMcwMgGUtcHc+Suwpi5hj2+Q8Y/SXIjR/Gik7"
-AWS_STORAGE_BUCKET_NAME = "samplele-bucket"
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-# AWS_S3_SIGNATURE_NAME = "s3v4"
-AWS_S3_REGION_NAME = "ap-southeast-2"
-AWS_DEFAULT_ACL = None
-
-AWS_S3_URL_PROTOCOL = "https"
-AWS_S3_USE_SSL = True
-AWS_S3_VERIFY = True
-
-STATIC_URL = f"{AWS_S3_URL_PROTOCOL}://{AWS_S3_CUSTOM_DOMAIN}/static/"
-STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-MEDIA_URL = f"{AWS_S3_URL_PROTOCOL}://{AWS_S3_CUSTOM_DOMAIN}/media/"
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
