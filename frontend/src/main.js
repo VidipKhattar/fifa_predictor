@@ -3,7 +3,7 @@ import SearchBar from "./components/searchbar";
 import SongTable from "./components/songTable";
 import React, { useState } from "react";
 import LinearProgress from "@mui/material/LinearProgress";
-import Fade from "react-reveal/Fade";
+import { motion } from "framer-motion";
 
 const loadingMessages = [
   "Downloading Song",
@@ -69,9 +69,7 @@ const Main = () => {
     setSearchLoading(true);
     setProgress(0);
     try {
-      console.log(songData.previewUrl);
       const videoLength = await getVideoDuration(songData.previewUrl);
-      console.log(videoLength);
       progressBarIncrement(videoLength);
       const response = await axios.post(
         process.env.NODE_ENV === "production"
@@ -80,7 +78,6 @@ const Main = () => {
         { songData }
       );
       setProgress(100);
-      console.log(response.data);
       setSongResponse(response.data["songDict"]);
       setPercentile(response.data["percentile"]);
 
@@ -110,9 +107,7 @@ const Main = () => {
           ? `${process.env.REACT_APP_API_BASE_URL_PROD}/length/?videoId=${videoId}`
           : `${process.env.REACT_APP_API_BASE_URL_DEV}/length/?videoId=${videoId}`
       );
-      console.log(response.data);
       const length = response.data["video_length"];
-      console.log("Video length:", length);
       setError(null);
       return length;
     } catch (err) {
@@ -122,16 +117,12 @@ const Main = () => {
   };
 
   const progressBarIncrement = (videoLength) => {
-    console.log("Video Length:", videoLength);
     const timeShould = videoLength / 2;
-    console.log("time taken should be: ", timeShould);
     const increment = 10 / timeShould;
-    console.log("Increment:", increment);
 
     const interval = setInterval(() => {
       setProgress((prev) => {
         const newProgress = Math.min(prev + increment, 100);
-        console.log("New Progress:", newProgress);
         if (isNaN(newProgress)) {
           console.error("Progress is NaN");
           clearInterval(interval);
@@ -193,7 +184,17 @@ const Main = () => {
               </span>
             </p>
           </div>
-          <Fade bottom duration={1200}>
+          <motion.div
+            className="box"
+            animate={{ y: 0, opacity: 1 }}
+            initial={{ y: 100, opacity: 0 }}
+            transition={{
+              y: { type: "spring", duration: 1.2 },
+              opacity: { duration: 1.2 },
+            }}
+          >
+            {/* Content here */}
+
             <div className="grid grid-cols-2 gap-4 pt-2 pb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
               <button onClick={() => setCurrentForm("search")}>
                 <span
@@ -214,67 +215,74 @@ const Main = () => {
                 </span>
               </button>
             </div>
-          </Fade>
+          </motion.div>
           <div>
-            <Fade bottom duration={1200}>
-              {currentForm === "upload" && (
-                <div className="pb-4">
-                  <form
-                    className="grid grid-cols-4 gap-4"
-                    onSubmit={handleFileSubmit}
-                  >
-                    <input
-                      className="col-span-3"
-                      type="file"
-                      onChange={handleFileChange}
-                    />
-                    <button
-                      className="min-[400px]:bg-violet-600 hover:bg-opacity-80 transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white"
-                      type="submit"
-                    >
-                      {searchLoading ? (
-                        <div
-                          className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                          role="status"
-                        ></div>
-                      ) : (
-                        "Analyse"
-                      )}
-                    </button>
-                  </form>
-                </div>
-              )}
-            </Fade>
-            {currentForm === "search" && (
-              <div className="grid grid-cols-4 gap-4 pb-4">
-                <div className="col-span-3">
-                  <SearchBar
-                    onSearchResultsChange={handleSamplerSearchResultsChange}
-                    userAnswer={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                  />
-                </div>
-                <button
-                  className={`min-[400px]:bg-violet-600 ${
-                    !userAnswer
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-opacity-80"
-                  } transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white`}
-                  type="submit"
-                  onClick={submitSongURl}
-                  disabled={!userAnswer || searchLoading}
+            {currentForm === "upload" && (
+              <div className="pb-4">
+                <form
+                  className="grid grid-cols-4 gap-4"
+                  onSubmit={handleFileSubmit}
                 >
-                  {searchLoading ? (
-                    <div
-                      className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                      role="status"
-                    ></div>
-                  ) : (
-                    "Analyse"
-                  )}
-                </button>
+                  <input
+                    className="col-span-3"
+                    type="file"
+                    onChange={handleFileChange}
+                  />
+                  <button
+                    className="min-[400px]:bg-violet-600 hover:bg-opacity-80 transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white"
+                    type="submit"
+                  >
+                    {searchLoading ? (
+                      <div
+                        className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                        role="status"
+                      ></div>
+                    ) : (
+                      "Analyse"
+                    )}
+                  </button>
+                </form>
               </div>
             )}
+            <motion.div
+              animate={{ y: 0, opacity: 1 }}
+              initial={{ y: 100, opacity: 0 }}
+              transition={{
+                y: { type: "spring", duration: 1.4 },
+                opacity: { duration: 1.4 },
+              }}
+            >
+              {currentForm === "search" && (
+                <div className="grid grid-cols-4 gap-4 pb-4">
+                  <div className="col-span-3">
+                    <SearchBar
+                      onSearchResultsChange={handleSamplerSearchResultsChange}
+                      userAnswer={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className={`min-[400px]:bg-violet-600 ${
+                      !userAnswer
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-opacity-80"
+                    } transition-colors duration-300 ease-in-out bg-opacity-50 backdrop-filter backdrop-blur-lg min-[400px]:p-2 rounded-xl shadow-lg w-full text-white`}
+                    type="submit"
+                    onClick={submitSongURl}
+                    disabled={!userAnswer || searchLoading}
+                  >
+                    {searchLoading ? (
+                      <div
+                        className="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                        role="status"
+                      ></div>
+                    ) : (
+                      "Analyse"
+                    )}
+                  </button>
+                </div>
+              )}
+            </motion.div>
             <div>
               {searchLoading && currentForm === "search" && (
                 <div>
@@ -296,22 +304,43 @@ const Main = () => {
                   <div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5">
                       <div>
-                        <Fade left duration={1500}>
+                        <motion.div
+                          animate={{ x: 0, opacity: 1 }}
+                          initial={{ x: -100, opacity: 0 }}
+                          transition={{
+                            x: { type: "spring", duration: 1.5 },
+                            opacity: { duration: 1.5 },
+                          }}
+                        >
                           <h3 className="min-[400px]:text-5xl italic font-bold">
                             {parseInt(songResponse.song_prob * 100)}%
                           </h3>
                           <p> Probability of being a FIFA song</p>
-                        </Fade>
-                        <Fade left duration={1300}>
+                        </motion.div>
+                        <motion.div
+                          animate={{ x: 0, opacity: 1 }}
+                          initial={{ x: -100, opacity: 0 }}
+                          transition={{
+                            x: { type: "spring", duration: 1.3 },
+                            opacity: { duration: 1.3 },
+                          }}
+                        >
                           <h1 className="min-[400px]:text-3xl italic font-bold pt-2">
                             {songResponse.song_name}
                           </h1>
                           <h2 className="min-[400px]:text-xl italic font-bold">
                             {songResponse.song_artist}
                           </h2>
-                        </Fade>
+                        </motion.div>
                       </div>
-                      <Fade left duration={1200}>
+                      <motion.div
+                        animate={{ x: 0, opacity: 1 }}
+                        initial={{ x: -100, opacity: 0 }}
+                        transition={{
+                          x: { type: "spring", duration: 1.2 },
+                          opacity: { duration: 1.2 },
+                        }}
+                      >
                         <div className="flex justify-center items-center rounded-xl">
                           <img
                             src={songResponse.song_cover}
@@ -320,27 +349,48 @@ const Main = () => {
                             className="rounded-2xl"
                           />
                         </div>
-                      </Fade>
+                      </motion.div>
                     </div>
-                    <Fade left duration={1300}>
+                    <motion.div
+                      animate={{ x: 0, opacity: 1 }}
+                      initial={{ x: -100, opacity: 0 }}
+                      transition={{
+                        x: { type: "spring", duration: 1.3 },
+                        opacity: { duration: 1.3 },
+                      }}
+                    >
                       <p className="m-5">
                         {parseInt(percentile)} percentile of searched songs
                       </p>
-                    </Fade>
-                    <Fade left duration={1600}>
+                    </motion.div>{" "}
+                    <motion.div
+                      animate={{ x: 0, opacity: 1 }}
+                      initial={{ x: -100, opacity: 0 }}
+                      transition={{
+                        x: { type: "spring", duration: 1.6 },
+                        opacity: { duration: 1.6 },
+                      }}
+                    >
                       <p className="m-5">
                         Check the table for a list of songs previous users have
                         analysed and their FIFA likelihood
                       </p>
-                    </Fade>
+                    </motion.div>{" "}
                   </div>
                 )}
                 {error && <div>Error: {error}</div>}
               </div>
               <div className="py-2">
-                <Fade bottom duration={1500}>
+                <motion.div
+                  animate={{ y: 0, opacity: 1 }}
+                  initial={{ y: 100, opacity: 0 }}
+                  transition={{
+                    y: { type: "spring", duration: 1.6 },
+                    opacity: { duration: 1.6 },
+                  }}
+                >
                   <SongTable />
-                </Fade>
+                </motion.div>{" "}
               </div>
             </div>
           </div>

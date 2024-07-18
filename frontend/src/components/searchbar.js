@@ -31,7 +31,6 @@ const SearchBar = ({ onSearchResultsChange, userAnswer }) => {
             ? process.env.REACT_APP_API_BASE_URL_PROD + ending
             : process.env.REACT_APP_API_BASE_URL_DEV + ending
         );
-        console.log(get_response.data["search_value"]);
         const tracks = get_response.data["search_value"].map((result) => ({
           name: result.title,
           artist:
