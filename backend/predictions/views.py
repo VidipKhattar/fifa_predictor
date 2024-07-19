@@ -62,11 +62,16 @@ def preprocess_audio(file, target_sr=22050):
 
 def extract_features(file_path):
 
+    print("preprocesses")
+
     y, sr = preprocess_audio(file_path)
 
     min_length = 2048  # Minimum length to avoid n_fft errors
     if len(y) < min_length:
         y = np.pad(y, (0, min_length - len(y)), "constant")
+
+    print("got preprocessed")
+    print(y)
 
     features = {
         "mfcc_mean": np.mean(librosa.feature.mfcc(y=y, sr=sr), axis=1),
@@ -79,11 +84,14 @@ def extract_features(file_path):
         "spectral_contrast": librosa.feature.spectral_contrast(y=y, sr=sr),
         "tempo": librosa.beat.tempo(y=y, sr=sr)[0],
     }
+    print(features)
+    print("got features")
     return features
 
 
 class PredictSong(APIView):
     def post(self, request, *args, **kwargs):
+        print("start test song")
         songDict = {
             "song_name": "",
             "song_link": "",
@@ -94,17 +102,40 @@ class PredictSong(APIView):
             "song_is_fifa": "",
         }
         try:
+            print(request.data.get("songData"))
+        except:
+            print("no songdata")
+        print(1)
+        try:
+            print(request.FILES["file"])
+        except:
+            print("no file")
+        try:
             if "file" in request.FILES:
+                print("reach file")
                 file = request.FILES["file"]
+                print(file)
+                print("got file")
                 file_data = io.BytesIO(file.read())
+                print(file_data)
+                print("got file data")
                 features = extract_features(file_data)
+                print("extracted data")
                 songDict["song_name"] = file.name
+                print("song_data got from file")
+                print(songDict)
             elif request.data.get("songData"):
+                print("reached request data sonf data")
                 songData = request.data.get("songData")
+                print(1)
                 video_id = songData["previewUrl"]
+                print(2)
                 youtube_url = "https://www.youtube.com/watch?v=" + video_id
+                print(3)
                 queryset = songGuess.objects.filter(song_link=youtube_url)
+                print(4)
                 serializer = SongGuessSerializer(queryset, many=True)
+                print(5)
                 if queryset.count() >= 1:
                     serializer = SongGuessSerializer(queryset.first())
                     song_guess = get_object_or_404(
@@ -115,18 +146,24 @@ class PredictSong(APIView):
                         {"songDict": serializer.data, "percentile": percentile},
                         status=status.HTTP_200_OK,
                     )
-
+                print(6)
                 songDict["song_name"] = songData["name"]
                 songDict["song_link"] = youtube_url
                 songDict["song_artist"] = songData["artist"]
                 songDict["song_album"] = songData["album"]
                 songDict["song_cover"] = songData["artwork"]
 
+                print(7)
+
                 yt = YouTube(youtube_url)
                 video = yt.streams.filter(only_audio=True).first()
 
+                print(8)
+
                 audio_buffer = io.BytesIO()
                 mp3_buffer = io.BytesIO()
+
+                print(9)
 
                 start = time.time()
                 session = requests.Session()
@@ -134,17 +171,23 @@ class PredictSong(APIView):
                 r.raise_for_status()
                 total_length = r.headers.get("content-length")
 
+                print(1)
+
                 if total_length is None:
                     audio_buffer.write(r.content)
                 else:
                     for chunk in r.iter_content(chunk_size=1024):
                         audio_buffer.write(chunk)
 
+                print(2)
+
                 audio_buffer.seek(0)
                 audio_segment = AudioSegment.from_file(audio_buffer)
 
                 audio_segment.export(mp3_buffer, format="mp3")
                 mp3_buffer.seek(0)
+
+                print(3)
 
                 features = extract_features(mp3_buffer)
 
@@ -224,14 +267,18 @@ class getSearchResults(APIView):
 
 class getVideoLength(APIView):
     def get(self, request):
+        print("start video Length")
         video_id = request.query_params.get("videoId")
+        print(video_id)
         if not video_id:
             return Response(
                 {"error": "videoId is required"}, status=status.HTTP_400_BAD_REQUEST
             )
         try:
             youtube_url = "https://www.youtube.com/watch?v=" + video_id
+            print(youtube_url)
             time = YouTube(youtube_url).length
+            print(time)
             return Response({"video_length": time}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
